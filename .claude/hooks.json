@@ -1,0 +1,28 @@
+{
+  "hooks": [
+    {
+      "name": "pre-implementation-check",
+      "description": "Enforces specification-first by checking for specs before code changes",
+      "event": "PreToolUse",
+      "command": "bash .claude/hooks/pre-implementation-check.sh \"{{toolName}}\" \"{{toolArgs}}\"",
+      "enabled": true,
+      "blocking": true
+    },
+    {
+      "name": "post-edit-validation",
+      "description": "Reminds to validate implementation after code changes",
+      "event": "PostToolUse",
+      "command": "bash .claude/hooks/post-edit-validation.sh \"{{toolName}}\" \"{{result}}\"",
+      "enabled": true,
+      "blocking": false
+    },
+    {
+      "name": "quality-reminder",
+      "description": "Reminds about specification-first principles on complex requests",
+      "event": "UserPromptSubmit",
+      "command": "bash .claude/hooks/quality-reminder.sh \"{{prompt}}\"",
+      "enabled": true,
+      "blocking": false
+    }
+  ]
+}

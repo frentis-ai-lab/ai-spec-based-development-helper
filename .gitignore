@@ -1,0 +1,45 @@
+# Specification runtime files
+.specs/.last-validation
+.specs/.bypass
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.pyc
+__pycache__/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Workspaces (실제 프로젝트 작업 공간)
+# 각 서브 프로젝트는 독립적으로 Git 관리
+workspaces/
+!workspaces/README.md

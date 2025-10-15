@@ -1,0 +1,33 @@
+{
+  "name": "ai-spec-based-development-helper",
+  "version": "1.0.0",
+  "description": "Claude Code toolkit enforcing specification-first development methodology",
+  "keywords": [
+    "claude-code",
+    "specification-first",
+    "ai-development",
+    "code-quality",
+    "development-workflow"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ai-spec-based-development-helper"
+  },
+  "bin": {
+    "spec-init-project": "./bin/spec-init-project.js"
+  },
+  "scripts": {
+    "setup": "chmod +x .claude/hooks/*.sh && chmod +x bin/*.js && echo 'Permissions granted'",
+    "validate-hooks": "bash -n .claude/hooks/*.sh && echo 'Hook syntax valid'",
+    "check-structure": "node scripts/check-structure.js",
+    "init-specs": "mkdir -p .specs && echo 'Specs directory created'",
+    "new": "node bin/spec-init-project.js",
+    "create": "node bin/spec-init-project.js"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
