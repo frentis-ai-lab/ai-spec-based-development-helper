@@ -6,6 +6,21 @@
 
 **핵심 철학**: "Reason before you type" 🧠 → ⌨️
 
+### 3-File Spec Structure
+
+**NEW**: 프로젝트는 3개의 독립적이면서 연결된 스펙 파일로 관리됩니다:
+
+| 파일 | 역할 | 프로젝트 타입 |
+|------|------|--------------|
+| **program-spec.md** | 시스템 아키텍처, 데이터 모델, 전체 요구사항 | 모든 프로젝트 (필수) |
+| **api-spec.md** | API 엔드포인트, 인증, 데이터 스키마 | Backend, Fullstack |
+| **ui-ux-spec.md** | UI 컴포넌트, 사용자 플로우, 상호작용 | Frontend, Fullstack |
+
+**구조별 스펙 파일**:
+- Backend: program-spec + api-spec
+- Frontend: program-spec + ui-ux-spec
+- Fullstack: program-spec + api-spec + ui-ux-spec (완전체)
+
 ## 개발 규칙 (MUST FOLLOW)
 
 ### 1. Specification-First 원칙
@@ -359,35 +374,70 @@ AI:
 
 ### 5. 템플릿 사용법
 
-#### feature-spec-template.md
+#### program-spec-template.md (NEW)
 
-**사용 대상**: 일반적인 기능 개발
+**사용 대상**: 모든 프로젝트 (마스터 스펙)
 
-**11개 섹션**:
-1. Overview (문제 정의, 목표, 비목표)
-2. Architecture (컴포넌트, 데이터 플로우, 기술 스택)
-3. Detailed Requirements (기능/비기능 요구사항)
-4. Implementation Plan (단계별 계획, 롤백 전략)
-5. Edge Cases & Risks (엣지케이스 5+, 리스크 평가)
-6. Testing Strategy (유닛/통합 테스트, 커버리지)
-7. Examples (코드 예제, API 계약)
-8. Documentation & Migration (문서 업데이트, 마이그레이션)
-9. Success Metrics (완료 기준, KPI)
-10. Open Questions (미해결 질문)
-11. Review & Approval (검토 기록)
+**핵심 섹션**:
+1. 개요 (문제 정의, 목표, 타겟 사용자, 범위)
+2. 시스템 아키텍처 (전체 구조도, 기술 스택, 아키텍처 패턴, ADR)
+3. 핵심 기능 목록 (각 기능마다 API/UI 스펙 참조)
+4. 데이터 모델 (ERD, 주요 엔티티, 관계)
+5. 비기능 요구사항 (성능, 보안, 확장성, 가용성)
+6. 외부 연동 (Third-party 서비스, 연동 전략)
+7. 배포 전략 (환경 구성, CI/CD, 롤백)
+8. 테스트 전략 (레벨별 테스트, 커버리지 목표)
+9. 프로젝트 일정 (마일스톤, 위험 요소)
+10. 개방된 질문 (미결정 사항, 해결 기한)
 
-#### api-spec-template.md
+**참조 형식**: `api-spec.md#인증API`, `ui-ux-spec.md#로그인화면`
 
-**사용 대상**: REST/GraphQL API 설계
+#### api-spec-template.md (Updated)
+
+**사용 대상**: Backend/Fullstack 프로젝트
 
 **특화 섹션**:
-- 엔드포인트 정의 (HTTP method, path, params)
-- 요청/응답 스키마
-- 에러 코드 체계
-- 인증/권한 모델
-- Rate limiting 전략
-- 버전 관리 정책
-- OpenAPI/Swagger 스펙
+1. API Configuration (Base URL, 인증 방식, Rate limiting)
+2. Authentication & Authorization (인증 방법, 권한 레벨)
+3. API Endpoints (각 엔드포인트별 상세 스펙)
+   - HTTP method, path, parameters
+   - Request/Response schemas
+   - Validation rules
+   - Error responses
+4. Data Models (TypeScript interfaces, validation)
+5. Error Handling (표준 에러 형식, 에러 코드)
+6. Rate Limiting (제한 정책, 헤더)
+7. Versioning (버전 전략, Deprecation 정책)
+8. Performance Requirements (응답 시간 목표, 처리량)
+9. Security (보안 조치, 민감 데이터 처리)
+10. Cross-Reference (program-spec 데이터 모델 참조, UI 매핑 테이블)
+
+#### ui-ux-spec-template.md (NEW)
+
+**사용 대상**: Frontend/Fullstack 프로젝트
+
+**특화 섹션**:
+1. Design Philosophy (핵심 원칙, 디자인 가치)
+2. Design System (Color palette, Typography, Spacing, Shadows)
+3. Component Library (Button, Input, Modal, Toast 등 변형과 상태)
+4. Screen Layouts (전체 레이아웃, Container, Breakpoints)
+5. User Flows (사용자 여정 맵, 화면 전환)
+6. Screen Specifications (각 화면별 상세 스펙)
+   - Wireframe
+   - Elements 목록
+   - Interactions (클릭, 호버, 폼 제출)
+   - Validation rules
+   - Error states
+   - API 호출 (`api-spec.md#endpoint` 참조)
+7. Interaction Patterns (폼 제출, 삭제 확인, 무한 스크롤 등)
+8. Animation & Transitions (Duration, Easing, 공통 애니메이션)
+9. Accessibility (WCAG 준수, Keyboard navigation, Screen reader)
+10. Cross-Reference (API 매핑 테이블, 기능 매핑)
+
+#### 레거시 템플릿 (Optional)
+
+- **feature-spec-template.md**: 단일 기능 스펙 (소규모 프로젝트용)
+- 3-파일 구조를 선호하지만, 간단한 기능은 단일 파일도 가능
 
 ---
 

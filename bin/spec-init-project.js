@@ -36,20 +36,27 @@ ${colors.bright}Usage:${colors.reset}
   spec-init-project <project-name> [options]
 
 ${colors.bright}Options:${colors.reset}
-  -t, --type <type>    Project type: node, python, rust (default: node)
-  -h, --help           Show this help message
+  -t, --type <type>         Project type: node, python, rust (default: node)
+  -s, --structure <struct>  Project structure: backend, frontend, fullstack (default: fullstack)
+  -h, --help                Show this help message
 
 ${colors.bright}Examples:${colors.reset}
   spec-init-project my-app
-  spec-init-project my-api --type node
-  spec-init-project ml-project --type python
-  spec-init-project game --type rust
+  spec-init-project my-api --type node --structure backend
+  spec-init-project my-web --type node --structure frontend
+  spec-init-project my-fullstack --structure fullstack
+  spec-init-project ml-api --type python --structure backend
+
+${colors.bright}Structure Types:${colors.reset}
+  backend     → program-spec.md + api-spec.md
+  frontend    → program-spec.md + ui-ux-spec.md
+  fullstack   → program-spec.md + api-spec.md + ui-ux-spec.md (default)
 
 ${colors.bright}What it does:${colors.reset}
   ✓ Creates workspaces/<project-name>/
   ✓ Sets up .claude/ symlink (Sub-agents, Hooks, Commands)
   ✓ Sets up templates/ symlink
-  ✓ Creates .specs/ directory
+  ✓ Creates .specs/ directory with spec templates
   ✓ Generates README.md and .gitignore
   ✓ Optionally initializes project (pnpm/uv/cargo)
 `);
@@ -57,6 +64,7 @@ ${colors.bright}What it does:${colors.reset}
 
 function createProject(projectName, options = {}) {
   const projectType = options.type || 'node';
+  const projectStructure = options.structure || 'fullstack';
   const rootDir = process.cwd();
   const projectDir = path.join(rootDir, 'workspaces', projectName);
 
@@ -67,6 +75,7 @@ function createProject(projectName, options = {}) {
   }
 
   log.info(`Creating Spec-First project: ${colors.bright}${projectName}${colors.reset}`);
+  log.info(`Type: ${colors.bright}${projectType}${colors.reset}, Structure: ${colors.bright}${projectStructure}${colors.reset}`);
   console.log('');
 
   // 1. Create directory
@@ -85,10 +94,12 @@ function createProject(projectName, options = {}) {
   fs.symlinkSync('../../templates', templatesLink);
   log.success('templates/ → ../../templates (symlink)');
 
-  // 3. Create .specs directory
-  log.step('Creating .specs directory...');
-  fs.mkdirSync(path.join(projectDir, '.specs'));
-  log.success('.specs/ directory created');
+  // 3. Create .specs directory with spec files
+  log.step('Creating .specs directory with spec templates...');
+  const specsDir = path.join(projectDir, '.specs');
+  fs.mkdirSync(specsDir);
+  createSpecFiles(specsDir, projectStructure, rootDir);
+  log.success('.specs/ directory created with spec templates');
 
   // 4. Create README.md
   log.step('Generating README.md...');
@@ -220,6 +231,34 @@ ${projectName}/
 `;
 }
 
+function createSpecFiles(specsDir, structure, rootDir) {
+  const templatesDir = path.join(rootDir, 'templates');
+
+  // 구조에 따라 복사할 템플릿 결정
+  const specFiles = {
+    backend: ['program-spec-template.md', 'api-spec-template.md'],
+    frontend: ['program-spec-template.md', 'ui-ux-spec-template.md'],
+    fullstack: ['program-spec-template.md', 'api-spec-template.md', 'ui-ux-spec-template.md']
+  };
+
+  const filesToCopy = specFiles[structure] || specFiles.fullstack;
+
+  // 템플릿 파일을 .specs/로 복사 (템플릿 접미사 제거)
+  filesToCopy.forEach(templateFile => {
+    const sourcePath = path.join(templatesDir, templateFile);
+    const destFileName = templateFile.replace('-template', '');
+    const destPath = path.join(specsDir, destFileName);
+
+    if (fs.existsSync(sourcePath)) {
+      const content = fs.readFileSync(sourcePath, 'utf8');
+      fs.writeFileSync(destPath, content);
+      log.success(`  ${destFileName} created`);
+    } else {
+      log.warn(`  Template ${templateFile} not found, skipping`);
+    }
+  });
+}
+
 function generateGitignore(projectType) {
   const common = `# Specs runtime
 .specs/.last-validation
@@ -296,7 +335,7 @@ Cargo.lock
 
 // Parse arguments
 function parseArgs(args) {
-  const options = { type: 'node' };
+  const options = { type: 'node', structure: 'fullstack' };
   let projectName = null;
 
   for (let i = 0; i < args.length; i++) {
@@ -307,6 +346,8 @@ function parseArgs(args) {
       process.exit(0);
     } else if (arg === '-t' || arg === '--type') {
       options.type = args[++i];
+    } else if (arg === '-s' || arg === '--structure') {
+      options.structure = args[++i];
     } else if (!arg.startsWith('-')) {
       projectName = arg;
     }
@@ -337,6 +378,14 @@ const validTypes = ['node', 'python', 'rust'];
 if (!validTypes.includes(options.type)) {
   log.error(`Invalid project type: ${options.type}`);
   log.info(`Valid types: ${validTypes.join(', ')}`);
+  process.exit(1);
+}
+
+// Validate project structure
+const validStructures = ['backend', 'frontend', 'fullstack'];
+if (!validStructures.includes(options.structure)) {
+  log.error(`Invalid project structure: ${options.structure}`);
+  log.info(`Valid structures: ${validStructures.join(', ')}`);
   process.exit(1);
 }
 

@@ -1,58 +1,45 @@
-# [API Name] Specification
+# API Specification
 
-**Author**: [Your Name]
-**Date**: [YYYY-MM-DD]
+> **역할**: 백엔드 API의 엔드포인트, 데이터 스키마, 인증 방식을 정의하는 기술 문서
+> **독자**: 백엔드 개발자, 프론트엔드 개발자, API 사용자
+> **관련 문서**: 시스템 아키텍처는 `program-spec.md`, UI 사용 방식은 `ui-ux-spec.md` 참조
+
 **Status**: Draft
 **Version**: 1.0
 **API Version**: v1
+**Last Updated**: [YYYY-MM-DD]
 
 ---
 
 ## 1. Overview
 
-### Purpose
-[What does this API do? What problem does it solve?]
+### 1.1 Purpose
+- **문제**: 이 API가 해결하는 문제
+- **솔루션**: 제공하는 기능
+- **전체 맥락**: `program-spec.md#개요` 참조
 
-### Scope
-- [In scope: Feature 1]
-- [In scope: Feature 2]
-- [Out of scope: Feature 3]
-
-### Key Features
-1. [Feature 1]
-2. [Feature 2]
-3. [Feature 3]
+### 1.2 Key Features
+1. [Feature 1] - `program-spec.md#기능1` 참조
+2. [Feature 2] - `program-spec.md#기능2` 참조
+3. [Feature 3] - `program-spec.md#기능3` 참조
 
 ---
 
-## 2. Architecture
+## 2. API Configuration
 
-### System Components
-
-```
-┌──────────┐      ┌──────────┐      ┌──────────┐
-│  Client  │─────▶│ API Gateway│────▶│ Service  │
-└──────────┘      └──────────┘      └──────────┘
-                         │
-                         ▼
-                  ┌──────────┐
-                  │ Database │
-                  └──────────┘
-```
-
-### Technology Stack
-- **API Framework**: [e.g., Express, FastAPI, Spring Boot]
-- **Authentication**: [e.g., JWT, OAuth 2.0]
-- **Database**: [e.g., PostgreSQL, MongoDB]
-- **Cache**: [e.g., Redis]
-- **Documentation**: [e.g., OpenAPI/Swagger]
-
-### Base URL
+### 2.1 Base URL
 ```
 Production:  https://api.example.com/v1
 Staging:     https://staging-api.example.com/v1
 Development: http://localhost:3000/v1
 ```
+
+### 2.2 Technology Stack
+> 전체 기술 스택과 아키텍처 패턴은 `program-spec.md#기술스택` 참조
+
+- **API Framework**: [e.g., Express, FastAPI]
+- **Authentication**: JWT
+- **Documentation**: OpenAPI/Swagger
 
 ---
 
@@ -439,9 +426,36 @@ curl -X POST https://api.example.com/v1/resources \
 
 ---
 
-## Appendix
+## Appendix A: Cross-Reference
 
-### Changelog
+### 다른 스펙과의 관계
+- **Program Spec**: 전체 시스템 아키텍처, 데이터 모델, 비기능 요구사항 참조
+- **UI/UX Spec**: 각 API가 어떤 화면에서 사용되는지 확인
+
+### 주요 API와 UI 매핑
+| API Endpoint | UI Screen | 설명 |
+|--------------|-----------|------|
+| POST /auth/login | `ui-ux-spec.md#로그인화면` | 로그인 처리 |
+| GET /users/:id | `ui-ux-spec.md#프로필화면` | 사용자 정보 표시 |
+| POST /contents | `ui-ux-spec.md#편집기` | 콘텐츠 생성 |
+
+---
+
+## Appendix B: Changelog
+
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2025-01-15 | Initial release |
+
+---
+
+## Review Checklist
+
+- [ ] 모든 엔드포인트가 명확히 정의됨
+- [ ] Request/Response 스키마가 완전함
+- [ ] 에러 케이스가 모두 정의됨
+- [ ] 인증/권한 검증 로직이 명확함
+- [ ] `program-spec.md`와 데이터 모델이 일치함
+- [ ] `ui-ux-spec.md`와 API 사용 방식이 일치함
+- [ ] 성능 요구사항이 측정 가능함
+- [ ] `/spec-review --file api-spec.md` 실행 (목표: 90점 이상)

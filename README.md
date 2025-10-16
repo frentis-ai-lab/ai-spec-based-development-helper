@@ -82,18 +82,26 @@
 
 ### 4. Comprehensive Templates
 
-다양한 개발 시나리오를 위한 템플릿:
+**NEW: 3-File Spec Structure** - 프로젝트를 3개의 독립적이면서 연결된 스펙으로 관리:
 
-- **feature-spec-template.md**: 일반 기능 개발
-- **api-spec-template.md**: API 엔드포인트 설계
+| 템플릿 | 역할 | 프로젝트 타입 |
+|-------|------|--------------|
+| **program-spec-template.md** | 시스템 아키텍처, 데이터 모델, 전체 요구사항 (마스터 문서) | 모든 프로젝트 (필수) |
+| **api-spec-template.md** | API 엔드포인트, 인증, 데이터 스키마 | Backend, Fullstack |
+| **ui-ux-spec-template.md** | UI 컴포넌트, 사용자 플로우, 디자인 시스템 | Frontend, Fullstack |
+
+**구조별 생성 파일**:
+- `--structure backend`: program-spec + api-spec
+- `--structure frontend`: program-spec + ui-ux-spec
+- `--structure fullstack`: program-spec + api-spec + ui-ux-spec (전체)
 
 각 템플릿 포함 사항:
 - 아키텍처 다이어그램
-- 요구사항 명세
+- 요구사항 명세 (파일별 특화)
 - 구현 단계
 - 엣지케이스 및 리스크 분석
 - 테스트 전략
-- 성공 메트릭
+- **Cross-references** (다른 스펙 파일 참조)
 
 ---
 
@@ -585,14 +593,17 @@ claude # Claude Code 실행 후
 #### CLI 사용 (추천 ⭐)
 
 ```bash
-# Node.js 프로젝트
+# Fullstack 프로젝트 (program + api + ui-ux spec)
 pnpm run new my-app
 
-# Python 프로젝트
-pnpm run new ml-service --type python
+# Backend 프로젝트 (program + api spec)
+pnpm run new my-api --structure backend
 
-# Rust 프로젝트
-pnpm run new game-engine --type rust
+# Frontend 프로젝트 (program + ui-ux spec)
+pnpm run new my-website --structure frontend
+
+# Python Backend
+pnpm run new ml-api --type python --structure backend
 
 # 프로젝트로 이동
 cd workspaces/my-app
@@ -600,14 +611,17 @@ cd workspaces/my-app
 # Claude Code 실행
 claude
 
-# 스펙 작성
+# 스펙 작성 (3개 파일이 이미 생성되어 있음!)
 /spec-init
 ```
 
 **자동으로 생성되는 것**:
 - ✅ `.claude/` → 심볼릭 링크 (Sub-agents, Hooks, Commands)
 - ✅ `templates/` → 심볼릭 링크
-- ✅ `.specs/` → 독립 디렉토리
+- ✅ `.specs/` → 독립 디렉토리 + **3개 스펙 템플릿 파일**
+  - `program-spec.md` (모든 프로젝트)
+  - `api-spec.md` (backend/fullstack만)
+  - `ui-ux-spec.md` (frontend/fullstack만)
 - ✅ `README.md`, `.gitignore`
 - ✅ `package.json/pyproject.toml/Cargo.toml` (타입별 자동 초기화)
 

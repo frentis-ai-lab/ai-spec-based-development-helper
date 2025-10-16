@@ -1,17 +1,39 @@
 # Initialize New Specification
 
-Create a comprehensive specification document for a new feature or project following the Specification-First methodology.
+Create comprehensive specification documents for a new feature or project following the Specification-First methodology with 3-file structure.
 
 ## Your Task
 
-1. **Understand the Requirement**
+1. **Check Existing Spec Files**
+   - List files in `.specs/` directory
+   - Identify which spec files already exist (program-spec.md, api-spec.md, ui-ux-spec.md)
+   - Determine project structure (backend/frontend/fullstack)
+
+2. **Understand the Requirement**
    - Ask clarifying questions if the user's request is vague
    - Identify the core problem being solved
    - Determine the scope and boundaries
+   - Understand which aspects need specification (architecture, API, UI/UX)
 
-2. **Create Specification Document**
+3. **Create/Update Specification Documents**
 
-   Create a file in `.specs/[feature-name]-spec.md` with the following structure:
+   Based on project structure, work with these files:
+
+   ### For Fullstack Projects (all 3 files):
+   - `.specs/program-spec.md` - System architecture, data models, requirements
+   - `.specs/api-spec.md` - API endpoints, authentication, data schemas
+   - `.specs/ui-ux-spec.md` - UI components, user flows, interactions
+
+   ### For Backend Projects:
+   - `.specs/program-spec.md` - System architecture, data models
+   - `.specs/api-spec.md` - API endpoints, authentication
+
+   ### For Frontend Projects:
+   - `.specs/program-spec.md` - System architecture, state management
+   - `.specs/ui-ux-spec.md` - UI components, user flows
+
+   **If template files already exist**, update them with actual content.
+   **If no template files exist**, create them using the structure below:
 
    ```markdown
    # [Feature Name] Specification
@@ -148,21 +170,53 @@ Create a comprehensive specification document for a new feature or project follo
    - [ ] Question 2?
    ```
 
-3. **Engage Ultrathink Mode**
+4. **Fill Out Each Spec File**
+
+   Work through each spec file systematically:
+
+   **Step 1: Program Spec (program-spec.md)**
+   - Start here - this is the master document
+   - Define system architecture, tech stack, data models
+   - Reference API and UI specs where appropriate
+   - Use template sections as guide
+
+   **Step 2: API Spec (api-spec.md)** [if backend/fullstack]
+   - Define all API endpoints
+   - Specify authentication, data schemas, error handling
+   - Cross-reference program-spec for data models
+   - Cross-reference ui-ux-spec for how UI uses each API
+
+   **Step 3: UI/UX Spec (ui-ux-spec.md)** [if frontend/fullstack]
+   - Define design system, components, user flows
+   - Specify each screen in detail with wireframes
+   - Cross-reference api-spec for API calls
+   - Cross-reference program-spec for features
+
+5. **Engage Ultrathink Mode**
    - Take time to think deeply about edge cases
    - Question assumptions
-   - Map all dependencies
+   - Map all dependencies across the 3 files
+   - Ensure consistency between program/api/ui specs
    - Consider what could go wrong
 
-4. **Next Steps**
-   After creating the spec:
-   - Notify user that spec is ready for review
+6. **Cross-File Consistency**
+   - Ensure data models match between program-spec and api-spec
+   - Ensure UI flows match API endpoints
+   - Ensure feature list in program-spec covers all APIs and UIs
+   - Use cross-references (e.g., `api-spec.md#auth-api`)
+
+7. **Next Steps**
+   After creating/updating the specs:
+   - Notify user which spec files were created/updated
+   - Show summary of each spec (sections filled)
    - Suggest running `/spec-review` to analyze quality
-   - Do NOT proceed to implementation until spec is approved
+   - Remind: Do NOT proceed to implementation until spec is approved (90+ score)
 
 ## Important Guidelines
-- **Be thorough** - Don't rush to code
+- **Be thorough** - Don't rush to code, fill all template sections
 - **Ask questions** - Better to clarify now than fix later
 - **Think critically** - Challenge the approach
 - **Document assumptions** - Make implicit knowledge explicit
 - **Consider alternatives** - Why this approach vs others?
+- **Maintain consistency** - Keep the 3 specs in sync with cross-references
+- **Use templates** - If spec templates exist, use them as structure guide
