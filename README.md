@@ -2,6 +2,10 @@
 
 > **"Reason before you type"** - A Claude Code toolkit that enforces specification-first development methodology to dramatically improve AI-assisted software engineering outcomes.
 
+**🚀 [빠른 시작 가이드](QUICKSTART.md)** | [전체 문서](#기능) | [워크스페이스](workspaces/README.md)
+
+---
+
 ## 문제 인식
 
 전통적인 task 기반 AI 개발 접근 방식의 문제점:
