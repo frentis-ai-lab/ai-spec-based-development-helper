@@ -30,7 +30,7 @@
 ```
 1. 요구사항 받음
    ↓
-2. /spec-init 실행 → 상세 스펙 작성
+2. /spec-init 실행 → 상세 스펙 작성 (3-file 구조)
    ↓
 3. /spec-review 실행 → 90점 이상 확보
    (90점 미만이면 피드백 반영 후 재검토)
@@ -38,10 +38,13 @@
 4. 구현 시작
    (pre-implementation-check hook이 스펙 확인)
    ↓
-5. /validate 실행 → 85점 이상 확보
+5. /test 실행 (NEW) → 자동 테스트 생성 및 실행
+   (커버리지 85%+ 목표)
+   ↓
+6. /validate 실행 → 85점 이상 확보
    (85점 미만이면 수정 후 재검증)
    ↓
-6. 배포
+7. 배포
 ```
 
 #### 예외 사항
@@ -182,6 +185,75 @@ AI: [Task tool로 spec-analyzer 실행]
 - ❌ 하드코딩된 값
 - ❌ 누락된 에러 핸들링
 - ❌ 검증되지 않은 가정
+
+#### test-runner (테스트 자동화) (NEW)
+
+**실행 시점**: 구현 완료 후, /validate 전
+
+```bash
+/test [path] [--model haiku|sonnet] [--coverage N]
+```
+
+**역할**:
+- 스펙 기반 자동 테스트 생성 및 실행
+- 85%+ 커버리지 목표
+
+**주요 기능**:
+1. **Spec-Code Mismatch 감지**
+   - 스펙에 정의된 함수 vs 실제 구현 비교
+   - 시그니처 불일치 경고
+   - 누락된 구현 알림
+
+2. **자동 테스트 생성**
+   - .specs/*.md 파일 기반
+   - 엣지케이스 테스트 (스펙 참조)
+   - 에러 핸들링 테스트
+   - API 엔드포인트 테스트 (api-spec.md)
+   - UI 상호작용 테스트 (ui-ux-spec.md)
+
+3. **테스트 실행 및 리포트**
+   - 유닛/통합/E2E 테스트 실행
+   - 커버리지 분석
+   - `.test-reports/` 에 상세 리포트 생성
+   - 실패한 테스트 우선순위 정렬
+
+4. **비용 최적화**
+   - 기본: Haiku 모델 사용
+   - 복잡도 10+ 함수: Sonnet 권장
+   - 기존 테스트 보존 (append only)
+
+**사용 방법**:
+```
+User: /test src/services/todo.ts
+
+AI: [Task tool로 test-runner 실행]
+
+    Phase 1: Analysis
+    - TypeScript backend 감지
+    - program-spec.md, api-spec.md 발견
+    - 기존 테스트 2개, 커버리지 60%
+
+    Phase 2: Generation
+    - 5개 요구사항, 3개 엣지케이스 추출
+    - 6개 누락 테스트 생성 중...
+
+    Phase 3: Execution
+    - 테스트 실행 중...
+    - 8 passed, 0 failed
+    - 새 커버리지: 88%
+
+    Phase 4: Report
+    - .test-reports/2025-10-17-143022/summary.md
+
+    ✅ All tests passing!
+    ✅ Coverage target exceeded (88% > 85%)
+
+    Next: Run /validate
+```
+
+**추가 명령어**:
+- `/test-unit`: 유닛 테스트만
+- `/test-api`: API 테스트만 (api-spec.md 기반)
 
 ---
 
@@ -347,6 +419,50 @@ AI: [implementation-validator 실행]
 
     Recommendation: REQUEST REVISION
     테스트 2개 추가 후 재검증
+```
+
+#### /test (테스트 자동화) (NEW)
+
+**사용 시점**: 구현 완료 후, /validate 전
+
+**프로세스**:
+1. 프로젝트 타입 감지 (TypeScript/Python)
+2. .specs/*.md 파일에서 요구사항 추출
+3. 누락된 테스트 식별
+4. 자동 테스트 코드 생성 (스펙 기반)
+5. 테스트 실행 및 커버리지 측정
+6. 상세 리포트 생성
+
+**출력**: `.test-reports/YYYY-MM-DD-HHmmss/summary.md`
+
+**예시**:
+```
+User: /test src/services/
+
+AI: [test-runner 실행]
+
+    Phase 1: Analysis
+    - Detected: TypeScript backend
+    - Found specs: program-spec.md, api-spec.md
+    - Existing: 5 tests (60% coverage)
+
+    Phase 2: Generation
+    - Extracted 8 requirements from specs
+    - Missing: 6 tests
+    - Generating with Haiku...
+
+    Phase 3: Execution
+    - Running: pnpm test --coverage
+    - 11 passed, 0 failed
+    - New coverage: 87%
+
+    Phase 4: Report
+    - .test-reports/2025-10-17-143022/summary.md
+
+    ✅ All tests passing!
+    ✅ Coverage: 87% (목표 85% 초과)
+
+    Next: Run /validate
 ```
 
 #### /spec-status (상태 확인)
@@ -586,7 +702,7 @@ User Request
                 ↓
             명확화 질문
                 ↓
-            스펙 작성
+            스펙 작성 (3-file)
                 ↓
             /spec-review
                 ↓
@@ -598,11 +714,15 @@ User Request
                             ↓
                         구현
                             ↓
-                        /validate
+                        /test (NEW)
                             ↓
-                        [평가] 85점 이상?
-                            ├─ No → 수정 → 재검증
-                            └─ Yes → 🚀 배포
+                        [커버리지] 85% 이상?
+                            ├─ No → 테스트 추가
+                            └─ Yes → /validate
+                                        ↓
+                                    [평가] 85점 이상?
+                                        ├─ No → 수정 → 재검증
+                                        └─ Yes → 🚀 배포
 ```
 
 ---
