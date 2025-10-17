@@ -8,24 +8,38 @@ AI가 무작정 코딩하는 것을 막고, **스펙 작성 → 검토 → 구�
 
 ## 📦 설치 (3가지 방법)
 
-### 방법 1: 기존 프로젝트에 적용
+### 방법 1: 기존 프로젝트에 적용 ⭐ 추천
 
+**원격 설치 (한 줄)**:
 ```bash
 cd your-project
+curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash
+```
 
-# 이 레포지토리 클론
-git clone https://github.com/frentis-ai-lab/ai-spec-based-development-helper.git .ai-helper
+**로컬 설치**:
+```bash
+# 1. 레포지토리 클론
+git clone https://github.com/frentis-ai-lab/ai-spec-based-development-helper.git
 
-# 심볼릭 링크 생성
-ln -s .ai-helper/.claude .claude
-ln -s .ai-helper/templates templates
-mkdir .specs
+# 2. 설치 스크립트 실행
+cd ai-spec-based-development-helper
+./scripts/install.sh /path/to/your-project
 
-# Claude Code 실행
+# 3. Claude Code 실행
+cd /path/to/your-project
 claude
 ```
 
-### 방법 2: 새 프로젝트 (CLI 사용) ⭐ 추천
+**설치 스크립트가 하는 일**:
+- ✅ `.claude/` 디렉토리 복사 (실제 파일, 심볼릭 링크 아님)
+- ✅ `templates/` 디렉토리 복사
+- ✅ `.specs/` 디렉토리 생성
+- ✅ Hook 실행 권한 설정
+- ✅ `.gitignore` 자동 업데이트
+
+### 방법 2: 새 프로젝트 (workspaces 사용)
+
+이 레포지토리를 직접 사용하여 새 프로젝트 개발:
 
 ```bash
 cd ai-spec-based-development-helper
@@ -44,14 +58,20 @@ cd workspaces/my-app
 claude
 ```
 
-### 방법 3: workspaces/ 에서 수동 생성
+**자동으로 생성되는 것**:
+- ✅ `.claude/` → 심볼릭 링크 (이 레포 개발 시 유용)
+- ✅ `templates/` → 심볼릭 링크
+- ✅ `.specs/` → 독립 디렉토리 + 3개 스펙 템플릿
+- ✅ `README.md`, `.gitignore`, `package.json`
+
+### 방법 3: 수동 설치 (고급)
 
 ```bash
-cd workspaces/my-project
-ln -s ../../.claude .claude
-ln -s ../../templates templates
-mkdir .specs
-claude
+# .claude/, templates/ 파일을 직접 복사
+cp -r /path/to/repo/.claude your-project/.claude
+cp -r /path/to/repo/templates your-project/templates
+mkdir your-project/.specs
+chmod +x your-project/.claude/hooks/*.sh
 ```
 
 ---

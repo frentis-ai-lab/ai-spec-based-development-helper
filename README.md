@@ -586,43 +586,44 @@ def deep_think_then_code(request):
 
 ## 설치 및 설정
 
-### 1. 프로젝트에 적용
+### 방법 1: 기존 프로젝트에 적용 (추천 ⭐)
 
+**원격 설치 (한 줄)**:
 ```bash
-# 이 레포지토리를 프로젝트에 복사하거나 클론
-cp -r .claude your-project/.claude
-cp -r templates your-project/templates
-
-# 또는 프로젝트 내에서 직접 사용
 cd your-project
-git clone https://github.com/yourusername/ai-spec-based-development-helper.git .ai-spec-helper
-ln -s .ai-spec-helper/.claude .claude
-ln -s .ai-spec-helper/templates templates
+curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash
 ```
 
-### 2. Hooks 실행 권한 부여
-
+**로컬 설치**:
 ```bash
-chmod +x .claude/hooks/*.sh
+# 1. 레포지토리 클론
+git clone https://github.com/frentis-ai-lab/ai-spec-based-development-helper.git
+
+# 2. 설치 스크립트 실행
+cd ai-spec-based-development-helper
+./scripts/install.sh /path/to/your-project
+
+# 3. Claude Code 실행
+cd /path/to/your-project
+claude
 ```
 
-### 3. Claude Code에서 확인
+**설치 스크립트가 하는 일**:
+- ✅ `.claude/` 디렉토리 복사 (실제 파일, 심볼릭 링크 아님)
+- ✅ `templates/` 디렉토리 복사
+- ✅ `.specs/` 디렉토리 생성
+- ✅ Hook 실행 권한 자동 설정
+- ✅ `.gitignore` 자동 업데이트
 
-```bash
-# Hooks 확인
-claude # Claude Code 실행 후
-# 자동으로 hooks.json이 로드됨
+**장점**:
+- 실제 파일 복사 → Git에 커밋 가능
+- Windows/Mac/Linux 모두 동작
+- 심볼릭 링크 없음 → 프로젝트 이동 시에도 안전
+- 한 번 설치 후 독립적 사용
 
-# Sub-agents 확인
-/agents
-# spec-analyzer, architecture-reviewer, implementation-validator가 표시되어야 함
+---
 
-# Commands 확인
-/spec-<TAB>
-# spec-init, spec-review, spec-status 자동완성 확인
-```
-
-### 4. 새 프로젝트 시작 (workspaces/)
+### 방법 2: 새 프로젝트 시작 (workspaces/)
 
 이 레포지토리를 직접 사용하여 새 프로젝트 개발:
 
@@ -661,31 +662,31 @@ claude
 - ✅ `README.md`, `.gitignore`
 - ✅ `package.json/pyproject.toml/Cargo.toml` (타입별 자동 초기화)
 
-#### 수동 설정
-
-```bash
-# 1. 프로젝트 디렉토리 생성
-mkdir -p workspaces/my-project
-cd workspaces/my-project
-
-# 2. 심볼릭 링크 생성 (중요!)
-ln -s ../../.claude .claude
-ln -s ../../templates templates
-mkdir .specs
-
-# 3. Claude Code 실행
-claude
-
-# 4. 스펙 작성
-/spec-init
-```
-
-**중요**: Claude Code는 **상위 디렉토리를 자동 탐색하지 않습니다**. 반드시 **심볼릭 링크**를 생성해야 합니다!
-
 **참고**:
 - CLI 도움말: `pnpm run new --help`
 - 전역 설치: `pnpm link` → 어디서든 `spec-init-project` 사용
 - 상세 가이드: [workspaces/README.md](workspaces/README.md)
+
+---
+
+### 방법 3: 수동 설치 (고급 사용자)
+
+```bash
+# .claude/, templates/ 파일을 직접 복사
+cp -r /path/to/repo/.claude your-project/.claude
+cp -r /path/to/repo/templates your-project/templates
+mkdir your-project/.specs
+chmod +x your-project/.claude/hooks/*.sh
+```
+
+**또는 workspaces에서 심볼릭 링크 사용**:
+```bash
+mkdir -p workspaces/my-project
+cd workspaces/my-project
+ln -s ../../.claude .claude
+ln -s ../../templates templates
+mkdir .specs
+```
 
 ---
 
