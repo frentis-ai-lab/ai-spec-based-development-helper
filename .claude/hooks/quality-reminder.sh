@@ -5,6 +5,11 @@
 
 PROMPT="$1"
 
+# Check for relaxed mode via environment variable
+if [[ "$CLAUDE_MODE" == "prototype" || "$CLAUDE_MODE" == "relaxed" ]]; then
+  exit 0
+fi
+
 # Check if prompt contains implementation keywords without spec mention
 IMPL_KEYWORDS="implement|create|build|code|write"
 SPEC_KEYWORDS="spec|specification|design|architecture"

@@ -284,20 +284,48 @@ AI: Compliance Score: 91/100
 
 ---
 
-## 📋 3-File Spec 구조
+## 📋 3-File Spec 구조 + Constitution
 
 프로젝트 타입별로 필요한 스펙 파일:
 
-| 프로젝트 타입 | 필요한 스펙 파일 |
-|--------------|-----------------|
-| **Backend** | program-spec.md + api-spec.md |
-| **Frontend** | program-spec.md + ui-ux-spec.md |
-| **Fullstack** | program-spec.md + api-spec.md + ui-ux-spec.md |
+| 프로젝트 타입 | 필요한 스펙 파일 | Constitution |
+|--------------|-----------------|-------------|
+| **Backend** | program-spec.md + api-spec.md | 선택 사항 |
+| **Frontend** | program-spec.md + ui-ux-spec.md | 선택 사항 |
+| **Fullstack** | program-spec.md + api-spec.md + ui-ux-spec.md | 선택 사항 |
 
 **각 파일 역할**:
 - `program-spec.md`: 시스템 전체 아키텍처, 데이터 모델
 - `api-spec.md`: API 엔드포인트, 인증, 데이터 스키마
 - `ui-ux-spec.md`: UI 컴포넌트, 사용자 플로우, 디자인
+- `PROJECT-CONSTITUTION.md` (NEW): 프로젝트별 코딩 규칙, 금지 사항
+
+### Constitution 시스템 (선택 사항, 권장)
+
+**프로젝트 개발 표준을 정의하고 자동 검증**:
+
+```bash
+# 1. Constitution 파일 생성
+cp templates/constitution-template.md .specs/PROJECT-CONSTITUTION.md
+
+# 2. 프로젝트에 맞게 커스터마이징
+# 예: TypeScript 프로젝트
+#   - 금지: any 타입, console.log
+#   - 필수: winston logger, Prisma ORM
+
+# 3. /spec-review 시 자동 검증 (+5 보너스 점수 가능)
+```
+
+**Constitution 파일 구조** (14개 섹션):
+- **금지 사항** [AUTO-CHECK]: `any` 타입, `console.log`, 순환 의존성 등
+- **기술 스택 표준** [AUTO-CHECK]: 필수 라이브러리, 버전 정책
+- **코딩 스타일** [AUTO-CHECK]: 네이밍 규칙, 주석 규칙
+- 에러 처리, 보안, 테스트, 성능 요구사항 등 (총 14개)
+
+**혜택**:
+- ✅ /spec-review 시 Constitution 준수하면 +5 보너스 점수
+- ✅ 금지 패턴 자동 감지 (스펙 작성 시 경고)
+- ✅ 팀 코딩 표준 일관성 유지
 
 ---
 
@@ -346,11 +374,30 @@ claude
 
 ### "스펙 없이 코딩하고 싶어요"
 
-→ Trivial한 작업(변수명, 포맷팅)만 가능. 20단어 이상 설명 필요하면 스펙 필수.
+**옵션 1 (권장)**: Trivial한 작업(변수명, 포맷팅)만 스펙 생략. 20단어 이상 설명 필요하면 스펙 필수.
+
+**옵션 2 (Prototype/탐색용)**: Relaxed Mode 활성화
+```bash
+# Hook 비활성화 (임시)
+export CLAUDE_MODE=prototype
+
+# 작업 후 반드시 원복
+unset CLAUDE_MODE
+```
+
+**Relaxed Mode 사용 시나리오**:
+- 🚀 빠른 MVP 프로토타입 개발
+- 🔍 코드베이스 탐색 및 실험
+- 🎬 데모 준비 중 빠른 수정
+- 📚 튜토리얼 진행
+
+**주의**: 정식 개발은 Specification-First를 따라야 합니다!
 
 ### "Hook이 차단해요"
 
-→ `.specs/` 디렉토리 없음. `/spec-init` 먼저 실행.
+**원인 1**: `.specs/` 디렉토리 없음 → `/spec-init` 먼저 실행
+
+**원인 2**: Prototype 모드 필요 → 위의 Relaxed Mode 참고
 
 ### "점수가 계속 낮아요"
 

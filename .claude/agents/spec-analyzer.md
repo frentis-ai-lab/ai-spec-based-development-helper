@@ -103,12 +103,136 @@ First, list files in `.specs/` directory to identify which specs exist:
 - [ ] Performance targets aligned
 - [ ] Cross-references are valid (e.g., `api-spec.md#endpoint` links work)
 
+## Step 4: Constitution Compliance Check (Optional, +5 bonus points)
+
+**If `.specs/PROJECT-CONSTITUTION.md` exists**, verify that the spec complies with project-specific rules.
+
+### 4.1 Parse Constitution File
+
+Identify `[AUTO-CHECK]` sections:
+1. **금지 사항** (Forbidden Patterns)
+2. **기술 스택 표준** (Tech Stack Standards)
+3. **코딩 스타일** (Coding Style)
+
+### 4.2 Check Forbidden Patterns (3 points)
+
+For each forbidden pattern in Constitution §1:
+- [ ] Spec does NOT contain forbidden keywords (e.g., `any`, `console.log`, `import *`)
+- [ ] If mentioned, it's in a "avoid" or "대안" context (exception pattern)
+- [ ] Code examples in spec use approved alternatives
+
+**Algorithm** (from constitution-system-spec.md §9.1 EC-3):
+```python
+def check_forbidden_patterns(spec_content: str, constitution: str) -> List[Violation]:
+    violations = []
+    forbidden_section = extract_section(constitution, "금지 사항")
+    forbidden_keywords = parse_forbidden_keywords(forbidden_section)
+
+    for keyword in forbidden_keywords:
+        if keyword in spec_content.lower():
+            # Check for exception patterns (7 types)
+            context = extract_context(spec_content, keyword, window=100)
+            if not is_exception(context, keyword):
+                violations.append({
+                    'pattern': keyword,
+                    'location': find_line_number(spec_content, keyword),
+                    'severity': 'ERROR',
+                    'message': f'Forbidden pattern "{keyword}" found in spec'
+                })
+
+    return violations
+```
+
+**Exception Patterns** (from constitution-system-spec.md §9.2 Risk-1):
+1. "avoid" keyword: `"avoid any type"` → ✅ OK (교육 목적)
+2. "대안" keyword: `"대안: unknown 사용"` → ✅ OK (대안 제시)
+3. "instead of": `"Use logger instead of console.log"` → ✅ OK
+4. "금지", "지양": `"console.log 금지"` → ✅ OK (금지 설명)
+5. ❌ marker: `"❌ any 타입 사용"` → ✅ OK (금지 표시)
+6. Code blocks: Fenced code in ```forbidden``` block → ✅ OK
+7. Negations: `"never use any"`, `"do not use any"` → ✅ OK
+
+### 4.3 Check Tech Stack (1 point)
+
+- [ ] Technology choices in spec match Constitution §2 (if specified)
+- [ ] Required libraries used (e.g., `winston` for logging, not `console`)
+- [ ] Prohibited libraries NOT used
+
+### 4.4 Check Coding Style (1 point)
+
+- [ ] Code examples follow naming conventions (Constitution §3)
+- [ ] Error handling patterns match standards (Constitution §4)
+- [ ] Comment style appropriate (JSDoc/docstring)
+
+### 4.5 Output Constitution Check Result
+
+```json
+{
+  "score": 3,
+  "compliant": [
+    "Uses winston logger (matches Constitution §2.2)",
+    "Naming follows PascalCase for classes (matches §3.1)"
+  ],
+  "violations": [
+    {
+      "pattern": "any 타입",
+      "location": "program-spec.md:145",
+      "severity": "ERROR",
+      "message": "Forbidden pattern 'any' found in spec (Constitution §1.1)",
+      "suggestion": "Use 'unknown' or explicit type definition"
+    }
+  ],
+  "warnings": [
+    "Tech stack not explicitly defined (Constitution §2 not referenced)"
+  ],
+  "recommendations": [
+    "Add reference to Constitution in spec header: 'Complies with PROJECT-CONSTITUTION.md v1.0.0'"
+  ]
+}
+```
+
+### 4.6 Markdown Feedback Format
+
+If violations found, append to Critical Gaps:
+
+```markdown
+### Constitution Violations (-3 points)
+
+**Constitution File**: PROJECT-CONSTITUTION.md v1.0.0
+
+#### Violation 1: Forbidden Pattern 'any'
+- **Location**: program-spec.md:145
+- **Rule**: Constitution §1.1 (금지 사항 - TypeScript)
+- **Found**:
+  ```typescript
+  const config: any = externalLib.getConfig();
+  ```
+- **Required Fix**:
+  ```typescript
+  const config: unknown = externalLib.getConfig();
+  // Or define explicit interface
+  ```
+
+#### Violation 2: Wrong Logger
+- **Location**: api-spec.md:78
+- **Rule**: Constitution §2.2 (기술 스택 표준)
+- **Found**: `console.log('User created')`
+- **Required Fix**: `logger.info('User created', { userId })`
+
+**Impact**: -3 points from Constitution check (3 violations * 1 point each)
+```
+
 ## Total Scoring
 
-**Maximum Points**:
-- Backend project: program-spec (40) + api-spec (35) + consistency (10) = 85 points → scale to 100
-- Frontend project: program-spec (40) + ui-ux-spec (40) + consistency (10) = 90 points → scale to 100
-- Fullstack project: program-spec (40) + api-spec (35) + ui-ux-spec (40) + consistency (10) = 125 points → scale to 100
+**Maximum Points** (Updated with Constitution):
+- Backend project: program-spec (40) + api-spec (35) + consistency (10) + constitution (5) = 90 points → scale to 100
+- Frontend project: program-spec (40) + ui-ux-spec (40) + consistency (10) + constitution (5) = 95 points → scale to 100
+- Fullstack project: program-spec (40) + api-spec (35) + ui-ux-spec (40) + consistency (10) + constitution (5) = 130 points → scale to 100
+
+**Constitution Bonus**:
+- If no Constitution file exists: score unchanged (no penalty)
+- If Constitution exists: +5 bonus points for full compliance
+- Violations: -1 point per violation (max -5)
 
 **Score Interpretation**:
 - **90-100**: Excellent - Ready for implementation ✅
@@ -157,6 +281,15 @@ Provide your analysis in this format:
 ### Cross-File Consistency: X/10 points
 [Comments on consistency between files]
 
+### Constitution Compliance: X/5 points (if applicable)
+[If .specs/PROJECT-CONSTITUTION.md exists]
+- Forbidden Patterns: X/3
+- Tech Stack: X/1
+- Coding Style: X/1
+
+**Violations**: [List violations or "None"]
+**Compliant Items**: [List compliant items]
+
 ### Overall Score: X/100
 
 ### Strengths
@@ -165,12 +298,14 @@ Provide your analysis in this format:
 ### Critical Gaps
 - [List missing or incomplete areas]
 - [Highlight inconsistencies between files]
+- [List Constitution violations if any]
 
 ### Required Improvements
 1. [Specific actionable items for program-spec]
 2. [Specific actionable items for api-spec]
 3. [Specific actionable items for ui-ux-spec]
 4. [Consistency improvements needed]
+5. [Constitution compliance fixes if needed]
 
 ### Recommendation
 ✅ **APPROVE** - Ready for implementation (Score 90+)
