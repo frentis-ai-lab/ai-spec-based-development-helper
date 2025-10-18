@@ -257,7 +257,32 @@ AI: [Task tool로 test-runner 실행]
 
 ---
 
-### 3. Hooks 동작 방식
+### 3. Hooks 동작 방식 (Updated)
+
+#### Relaxed Mode 지원 (NEW)
+
+**모든 Hook은 환경 변수로 우회 가능**:
+
+```bash
+# Prototype 개발 시 Hook 비활성화
+export CLAUDE_MODE=prototype
+
+# 또는
+export CLAUDE_MODE=relaxed
+
+# 원복
+unset CLAUDE_MODE
+```
+
+**사용 시나리오**:
+- **Prototype**: 빠른 MVP 개발, 스펙 없이 실험
+- **Exploration**: 코드베이스 탐색, 리팩토링 실험
+- **Demo**: 데모 준비 중 빠른 수정
+- **Learning**: 튜토리얼 진행, 학습 목적
+
+**주의**: Relaxed mode는 임시 우회용입니다. 정식 개발은 Specification-First를 따라야 합니다.
+
+---
 
 #### pre-implementation-check (PreToolUse - Blocking)
 
@@ -265,6 +290,14 @@ AI: [Task tool로 test-runner 실행]
 
 **동작**:
 ```bash
+# Relaxed mode 체크 (NEW)
+if [[ "$CLAUDE_MODE" == "prototype" || "$CLAUDE_MODE" == "relaxed" ]]; then
+  echo "ℹ️  Relaxed mode enabled (CLAUDE_MODE=$CLAUDE_MODE)"
+  echo "   Skipping spec validation checks."
+  exit 0
+fi
+
+# 기존 검증 로직
 if [ ! -d ".specs" ]; then
   echo "⚠️  .specs 디렉토리 없음"
   echo "먼저 /spec-init 실행하세요"
@@ -278,13 +311,22 @@ if [ $(find .specs -name "*.approved.md" | wc -l) -eq 0 ]; then
 fi
 ```
 
-**우회 방법** (긴급 상황만):
-```bash
-mkdir -p .specs
-touch .specs/.bypass
-# 작업 후 반드시 삭제
-rm .specs/.bypass
-```
+**우회 방법**:
+
+1. **권장 (환경 변수)**:
+   ```bash
+   export CLAUDE_MODE=prototype
+   # 작업...
+   unset CLAUDE_MODE
+   ```
+
+2. **레거시 (긴급 상황만)**:
+   ```bash
+   mkdir -p .specs
+   touch .specs/.bypass
+   # 작업 후 반드시 삭제
+   rm .specs/.bypass
+   ```
 
 #### post-edit-validation (PostToolUse - Non-blocking)
 
@@ -292,6 +334,11 @@ rm .specs/.bypass
 
 **동작**:
 ```bash
+# Relaxed mode 체크 (NEW)
+if [[ "$CLAUDE_MODE" == "prototype" || "$CLAUDE_MODE" == "relaxed" ]]; then
+  exit 0
+fi
+
 # .specs/.last-validation 타임스탬프 확인
 # 5분 이상 경과 시:
 echo "📋 Reminder: 구현 완료 후 /validate 실행하세요"
@@ -303,6 +350,11 @@ echo "📋 Reminder: 구현 완료 후 /validate 실행하세요"
 
 **동작**:
 ```bash
+# Relaxed mode 체크 (NEW)
+if [[ "$CLAUDE_MODE" == "prototype" || "$CLAUDE_MODE" == "relaxed" ]]; then
+  exit 0
+fi
+
 # 단어 수 > 20 && 구현 키워드 포함?
 if complex_request; then
   echo "💡 Specification-First 추천"
@@ -550,6 +602,66 @@ AI:
 9. Accessibility (WCAG 준수, Keyboard navigation, Screen reader)
 10. Cross-Reference (API 매핑 테이블, 기능 매핑)
 
+#### constitution-template.md (NEW)
+
+**사용 대상**: 모든 프로젝트 (프로젝트별 개발 표준)
+
+**특징**:
+- 프로젝트별 코딩 규칙 및 금지 사항 정의
+- `[AUTO-CHECK]` 섹션은 spec-analyzer가 자동 검증
+- /spec-review 시 Constitution 준수 여부 확인 (+5 보너스 점수)
+
+**핵심 섹션** (14개):
+1. **금지 사항** [AUTO-CHECK]
+   - 언어별 금지 패턴 (`any` 타입, `console.log` 등)
+   - 아키텍처 금지 패턴 (순환 의존성, God objects)
+   - Hard-coded credentials 금지
+
+2. **기술 스택 표준** [AUTO-CHECK]
+   - 언어 및 런타임 (TypeScript 5.3+, Python 3.12+ 등)
+   - 필수 라이브러리 (로깅, ORM, 테스트 프레임워크)
+   - 버전 정책 (LTS 우선, 의존성 업데이트 주기)
+
+3. **코딩 스타일** [AUTO-CHECK]
+   - 네이밍 규칙 (함수명, 변수명, 클래스명)
+   - 주석 규칙 (필수/금지 주석)
+   - 파일 구조 (도메인 기반 분리)
+
+4. 에러 처리 표준
+5. 보안 요구사항
+6. 테스트 요구사항
+7. 성능 요구사항
+8. 문서화 요구사항
+9. Git 워크플로우
+10. 배포 및 모니터링
+11. 프로젝트별 커스텀 규칙
+12. 예외 처리 프로세스
+13. Constitution 변경 이력
+14. 참고 자료
+
+**사용 방법**:
+```bash
+# 1. 프로젝트 시작 시 Constitution 생성
+cp templates/constitution-template.md .specs/PROJECT-CONSTITUTION.md
+
+# 2. 프로젝트 특성에 맞게 커스터마이징
+# 3. /spec-review 시 자동으로 검증됨
+
+# 예: 금지 사항 추가
+## 1. 금지 사항 [AUTO-CHECK]
+- ❌ `any` 타입 사용
+  - **이유**: 타입 안정성 상실
+  - **대안**: `unknown` 또는 명시적 타입 정의
+```
+
+**예외 승인 프로세스**:
+```typescript
+// CONSTITUTION_EXCEPTION: Approved by @tech-lead on 2025-10-18
+// Reason: Third-party library requires `any` type
+// See: https://github.com/org/repo/issues/456
+const config: any = externalLib.getConfig();
+```
+
 #### 레거시 템플릿 (Optional)
 
 - **feature-spec-template.md**: 단일 기능 스펙 (소규모 프로젝트용)
@@ -557,7 +669,93 @@ AI:
 
 ---
 
-### 6. 품질 기준
+### 6. Constitution 시스템 (NEW)
+
+**목적**: 프로젝트별 개발 표준을 정의하고 자동으로 검증
+
+#### 6.1 Constitution 파일 생성
+
+```bash
+# 템플릿 복사
+cp templates/constitution-template.md .specs/PROJECT-CONSTITUTION.md
+
+# 프로젝트에 맞게 수정
+# - 기술 스택 (TypeScript? Python? Go?)
+# - 금지 패턴 (프로젝트 특화)
+# - 코딩 스타일 (팀 합의)
+```
+
+#### 6.2 spec-analyzer 자동 검증
+
+Constitution이 존재하면 `/spec-review` 시 자동으로 검증됩니다:
+
+**검증 항목**:
+1. **금지 패턴 검사** (3점)
+   - 스펙 내 코드 예제가 금지된 패턴 포함 여부
+   - 7가지 예외 패턴 자동 인식 (`avoid`, `대안`, `instead of`, `금지`, `❌`, code blocks, negations)
+
+2. **기술 스택 준수** (1점)
+   - 스펙의 기술 선택이 Constitution과 일치
+   - 필수 라이브러리 사용 (예: `winston` logger)
+
+3. **코딩 스타일 일관성** (1점)
+   - 네이밍 규칙 준수
+   - 에러 처리 패턴 일치
+
+**점수 계산**:
+- Constitution 없음: 기본 점수 (패널티 없음)
+- Constitution 완벽 준수: +5 보너스 점수
+- 위반 발견: 위반당 -1점 (최대 -5점)
+
+#### 6.3 검증 예시
+
+```markdown
+User: /spec-review
+
+AI: [spec-analyzer 실행]
+
+    Constitution Compliance: 2/5 points
+
+    **Constitution File**: PROJECT-CONSTITUTION.md v1.0.0
+
+    ✅ Compliant:
+    - Uses winston logger (matches Constitution §2.2)
+    - Naming follows PascalCase (matches §3.1)
+
+    ❌ Violations:
+    1. Forbidden Pattern 'any'
+       - Location: program-spec.md:145
+       - Rule: Constitution §1.1 (금지 사항 - TypeScript)
+       - Found: `const config: any = externalLib.getConfig();`
+       - Fix: Use `unknown` or define explicit interface
+
+    2. Wrong Logger
+       - Location: api-spec.md:78
+       - Rule: Constitution §2.2 (기술 스택 표준)
+       - Found: `console.log('User created')`
+       - Fix: `logger.info('User created', { userId })`
+
+    Impact: -3 points (3 violations)
+
+    Total Score: 87/100 → REQUEST REVISION
+```
+
+#### 6.4 예외 처리
+
+Constitution 규칙을 위반해야 하는 경우:
+
+```typescript
+// CONSTITUTION_EXCEPTION: Approved by @tech-lead on 2025-10-18
+// Reason: Third-party library requires `any` type
+// See: https://github.com/org/repo/issues/456
+const config: any = externalLib.getConfig();
+```
+
+코드에 주석으로 예외 사유를 명시하면 spec-analyzer가 인식합니다.
+
+---
+
+### 7. 품질 기준
 
 #### 스펙 품질 (90점 목표)
 

@@ -11,6 +11,15 @@ if [[ "$TOOL_NAME" != "Edit" && "$TOOL_NAME" != "Write" ]]; then
   exit 0
 fi
 
+# Check for relaxed mode via environment variable
+# Usage: export CLAUDE_MODE=prototype (or CLAUDE_MODE=relaxed)
+if [[ "$CLAUDE_MODE" == "prototype" || "$CLAUDE_MODE" == "relaxed" ]]; then
+  echo "ℹ️  Relaxed mode enabled (CLAUDE_MODE=$CLAUDE_MODE)"
+  echo "   Skipping spec validation checks."
+  echo ""
+  exit 0
+fi
+
 # Check if spec directory exists
 SPEC_DIR=".specs"
 if [ ! -d "$SPEC_DIR" ]; then

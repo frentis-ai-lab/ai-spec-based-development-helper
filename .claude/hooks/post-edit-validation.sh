@@ -11,6 +11,11 @@ if [[ "$TOOL_NAME" != "Edit" && "$TOOL_NAME" != "Write" ]]; then
   exit 0
 fi
 
+# Check for relaxed mode via environment variable
+if [[ "$CLAUDE_MODE" == "prototype" || "$CLAUDE_MODE" == "relaxed" ]]; then
+  exit 0
+fi
+
 # Check if validation has been run recently
 VALIDATION_MARKER=".specs/.last-validation"
 CURRENT_TIME=$(date +%s)

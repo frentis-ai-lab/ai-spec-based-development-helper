@@ -69,22 +69,86 @@
 - 비용 효율적 (Haiku 우선, 복잡한 함수만 Sonnet)
 - 기존 테스트 보존 (절대 덮어쓰지 않음, append만)
 
-### 2. Intelligent Hooks
+### 2. Constitution System (NEW)
+
+프로젝트별 개발 표준을 정의하고 자동으로 검증하는 시스템:
+
+**핵심 개념**:
+- 📜 **Project Constitution**: 프로젝트별 코딩 규칙, 금지 사항, 기술 스택 표준
+- 🤖 **Auto-Check Sections**: `[AUTO-CHECK]` 마킹된 섹션은 spec-analyzer가 자동 검증
+- ✅ **Bonus Points**: Constitution 준수 시 /spec-review에서 +5 보너스 점수
+
+**Constitution 파일 구조** (14개 섹션):
+1. **금지 사항** [AUTO-CHECK]
+   - 언어별 금지 패턴 (`any` 타입, `console.log`, `import *`)
+   - 아키텍처 금지 패턴 (순환 의존성, God objects)
+   - Hard-coded credentials 금지
+
+2. **기술 스택 표준** [AUTO-CHECK]
+   - 언어/런타임 버전 (TypeScript 5.3+, Python 3.12+)
+   - 필수 라이브러리 (로깅, ORM, 테스트 프레임워크)
+   - 버전 정책
+
+3. **코딩 스타일** [AUTO-CHECK]
+   - 네이밍 규칙 (함수명, 변수명, 클래스명)
+   - 주석 규칙, 파일 구조
+
+4-14. 에러 처리, 보안, 테스트, 성능, 문서화, Git 워크플로우 등
+
+**자동 검증 기능**:
+- ❌ 스펙 내 금지 패턴 자동 감지
+- ✅ 7가지 예외 패턴 인식 (`avoid`, `대안`, `instead of`, `금지`, `❌`)
+- 📊 Constitution 준수도 점수 계산 (0-5점)
+
+**사용 예시**:
+```bash
+# 1. Constitution 파일 생성
+cp templates/constitution-template.md .specs/PROJECT-CONSTITUTION.md
+
+# 2. 프로젝트에 맞게 커스터마이징
+# 3. /spec-review 시 자동 검증됨 (+5 보너스 가능)
+```
+
+### 3. Intelligent Hooks (Updated)
 
 개발 워크플로우의 특정 시점에 자동 실행:
+
+#### 🆕 **Relaxed Mode Support** (NEW)
+
+**모든 Hook을 환경 변수로 우회 가능**:
+```bash
+# Prototype/탐색 모드 활성화
+export CLAUDE_MODE=prototype  # 또는 relaxed
+
+# 원복
+unset CLAUDE_MODE
+```
+
+**사용 시나리오**:
+- 🚀 Prototype: 빠른 MVP 개발, 스펙 없이 실험
+- 🔍 Exploration: 코드베이스 탐색, 리팩토링 실험
+- 🎬 Demo: 데모 준비 중 빠른 수정
+- 📚 Learning: 튜토리얼 진행, 학습 목적
+
+**주의**: Relaxed mode는 임시 우회용입니다. 정식 개발은 Specification-First를 따라야 합니다.
+
+---
 
 #### 🔒 **pre-implementation-check** (PreToolUse)
 - 코드 편집 전 스펙 파일 존재 확인
 - 승인된 스펙 없이 구현 차단
 - Specification-First 원칙 강제
+- ✅ Relaxed mode에서 자동 우회
 
 #### 📝 **post-edit-validation** (PostToolUse)
 - 코드 변경 후 검증 리마인더
 - 스펙 준수 확인 유도
+- ✅ Relaxed mode에서 비활성화
 
 #### 💡 **quality-reminder** (UserPromptSubmit)
 - 복잡한 구현 요청 시 스펙 작성 권장
 - 방법론 지속적 상기
+- ✅ Relaxed mode에서 비활성화
 
 ### 3. Slash Commands
 
@@ -103,26 +167,35 @@
 
 ### 4. Comprehensive Templates
 
-**NEW: 3-File Spec Structure** - 프로젝트를 3개의 독립적이면서 연결된 스펙으로 관리:
+**NEW: 3-File Spec Structure + Constitution** - 프로젝트를 3개의 독립적이면서 연결된 스펙으로 관리:
 
 | 템플릿 | 역할 | 프로젝트 타입 |
 |-------|------|--------------|
 | **program-spec-template.md** | 시스템 아키텍처, 데이터 모델, 전체 요구사항 (마스터 문서) | 모든 프로젝트 (필수) |
 | **api-spec-template.md** | API 엔드포인트, 인증, 데이터 스키마 | Backend, Fullstack |
 | **ui-ux-spec-template.md** | UI 컴포넌트, 사용자 플로우, 디자인 시스템 | Frontend, Fullstack |
+| **constitution-template.md** (NEW) | 프로젝트별 코딩 규칙, 금지 사항, 기술 스택 표준 | 모든 프로젝트 (선택) |
 
 **구조별 생성 파일**:
-- `--structure backend`: program-spec + api-spec
-- `--structure frontend`: program-spec + ui-ux-spec
-- `--structure fullstack`: program-spec + api-spec + ui-ux-spec (전체)
+- `--structure backend`: program-spec + api-spec (+ Constitution 선택)
+- `--structure frontend`: program-spec + ui-ux-spec (+ Constitution 선택)
+- `--structure fullstack`: program-spec + api-spec + ui-ux-spec (+ Constitution 선택)
 
-각 템플릿 포함 사항:
+각 스펙 템플릿 포함 사항:
 - 아키텍처 다이어그램
 - 요구사항 명세 (파일별 특화)
 - 구현 단계
 - 엣지케이스 및 리스크 분석
 - 테스트 전략
 - **Cross-references** (다른 스펙 파일 참조)
+
+Constitution 템플릿 포함 사항:
+- 금지 사항 (언어별, 아키텍처 패턴)
+- 기술 스택 표준 (필수 라이브러리, 버전 정책)
+- 코딩 스타일 (네이밍, 주석, 파일 구조)
+- 에러 처리, 보안, 테스트, 성능 요구사항
+- Git 워크플로우, 배포 전략
+- **14개 섹션**, `[AUTO-CHECK]` 마킹 지원
 
 ---
 
