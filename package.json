@@ -1,6 +1,6 @@
 {
   "name": "ai-spec-based-development-helper",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Claude Code toolkit enforcing specification-first development methodology",
   "keywords": [
     "claude-code",
@@ -9,11 +9,11 @@
     "code-quality",
     "development-workflow"
   ],
-  "author": "Your Name",
+  "author": "Frentis AI Lab",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/ai-spec-based-development-helper"
+    "url": "https://github.com/frentis-ai-lab/ai-spec-based-development-helper"
   },
   "bin": {
     "spec-init-project": "./bin/spec-init-project.js"

@@ -14,6 +14,57 @@
 
 ---
 
+## 🌿 브랜치 전략: GitHub Flow
+
+이 프로젝트는 **GitHub Flow**를 사용합니다:
+
+```
+main (항상 배포 가능)
+  ├─ feature/new-sub-agent-security
+  ├─ feature/command-spec-compare
+  ├─ fix/hook-windows-compatibility
+  ├─ docs/update-architecture-guide
+  └─ refactor/test-runner-performance
+```
+
+### 브랜치 규칙
+
+#### `main` 브랜치
+- **항상 안정적이고 배포 가능한 상태 유지**
+- 직접 커밋 금지 (PR을 통해서만 머지)
+- 모든 커밋은 `/spec-review` (90+) 및 `/validate` (85+) 통과 필수
+- 태그로 버전 관리 (v0.0.1, v0.1.0, etc.)
+
+#### 작업 브랜치 명명 규칙
+
+```bash
+# 기능 추가
+feature/<feature-name>
+예: feature/sub-agent-security-auditor
+
+# 버그 수정
+fix/<issue-description>
+예: fix/hook-permission-error
+
+# 문서 업데이트
+docs/<document-name>
+예: docs/update-quickstart
+
+# 리팩토링
+refactor/<component-name>
+예: refactor/test-runner-logic
+
+# 성능 개선
+perf/<improvement-area>
+예: perf/spec-parser-optimization
+
+# 테스트
+test/<test-area>
+예: test/add-edge-cases-coverage
+```
+
+---
+
 ## 기여 프로세스
 
 ### 1. Issue 생성
@@ -26,8 +77,15 @@
 ### 2. Fork & Branch
 
 ```bash
+# Fork 후 클론
 git clone https://github.com/yourusername/ai-spec-based-development-helper.git
 cd ai-spec-based-development-helper
+
+# main에서 최신 코드 가져오기
+git checkout main
+git pull origin main
+
+# 작업 브랜치 생성 (브랜치 명명 규칙 준수!)
 git checkout -b feature/your-feature-name
 ```
 
