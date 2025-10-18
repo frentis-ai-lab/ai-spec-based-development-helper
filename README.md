@@ -615,6 +615,21 @@ claude
 - ✅ Hook 실행 권한 자동 설정
 - ✅ `.gitignore` 자동 업데이트
 
+**기존 프로젝트 업데이트**:
+```bash
+# 이미 설치된 프로젝트를 최신 버전으로 업데이트
+cd your-project
+curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash -s -- --update
+
+# 또는 로컬에서
+./scripts/install.sh /path/to/your-project --update
+```
+
+**--update 플래그 특징**:
+- ✅ `.claude/`, `templates/` 자동 덮어쓰기 (확인 없음)
+- ✅ `.specs/` 디렉토리 보존 (작업물 안전)
+- ✅ 빠른 업데이트 (프롬프트 없음)
+
 **장점**:
 - 실제 파일 복사 → Git에 커밋 가능
 - Windows/Mac/Linux 모두 동작

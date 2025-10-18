@@ -2,9 +2,10 @@
 
 # AI Specification-Based Development Helper - Installation Script
 # Usage:
-#   ./install.sh [target-directory]
+#   ./install.sh [target-directory] [--update]
 #   curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash
 #   curl -fsSL https://[...]/install.sh | bash -s /path/to/project
+#   curl -fsSL https://[...]/install.sh | bash -s -- --update
 
 set -e
 
@@ -12,14 +13,34 @@ set -e
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Parse arguments
+UPDATE_MODE=false
+TARGET_DIR="."
+
+for arg in "$@"; do
+    case $arg in
+        --update)
+            UPDATE_MODE=true
+            shift
+            ;;
+        *)
+            TARGET_DIR="$arg"
+            ;;
+    esac
+done
+
 # Configuration
-TARGET_DIR="${1:-.}"
 REPO_URL="https://github.com/frentis-ai-lab/ai-spec-based-development-helper"
 REPO_RAW_URL="https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main"
 
-echo -e "${GREEN}📦 AI Spec Helper Installation${NC}"
+if [ "$UPDATE_MODE" = true ]; then
+    echo -e "${BLUE}🔄 AI Spec Helper Update${NC}"
+else
+    echo -e "${GREEN}📦 AI Spec Helper Installation${NC}"
+fi
 echo "Target directory: $TARGET_DIR"
 echo ""
 
@@ -71,31 +92,59 @@ download_directory() {
     rm -rf "$TMP_DIR"
 }
 
-# Check if .claude already exists
-if [ -d "$TARGET_DIR/.claude" ]; then
-    echo -e "${YELLOW}⚠️  .claude/ directory already exists${NC}"
-    read -p "Do you want to overwrite it? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installation cancelled."
-        exit 0
-    fi
-    rm -rf "$TARGET_DIR/.claude"
-fi
+# Handle existing installations
+if [ "$UPDATE_MODE" = true ]; then
+    # Update mode: automatically overwrite .claude and templates
+    echo -e "${BLUE}Update mode: Overwriting .claude/ and templates/${NC}"
 
-# Check if templates already exists
-if [ -d "$TARGET_DIR/templates" ]; then
-    echo -e "${YELLOW}⚠️  templates/ directory already exists${NC}"
-    read -p "Do you want to overwrite it? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Skipping templates installation."
-    else
+    if [ -d "$TARGET_DIR/.claude" ]; then
+        rm -rf "$TARGET_DIR/.claude"
+        echo -e "  ${GREEN}✓${NC} Removed old .claude/"
+    fi
+
+    if [ -d "$TARGET_DIR/templates" ]; then
         rm -rf "$TARGET_DIR/templates"
+        echo -e "  ${GREEN}✓${NC} Removed old templates/"
+    fi
+
+    INSTALL_TEMPLATES=true
+
+    # Check if .specs exists (should exist in update mode)
+    if [ ! -d "$TARGET_DIR/.specs" ]; then
+        echo -e "${YELLOW}⚠️  Warning: .specs/ not found. This might not be an existing project.${NC}"
+        echo "   Continuing anyway..."
+    else
+        echo -e "  ${GREEN}✓${NC} .specs/ preserved (your specifications are safe)"
+    fi
+    echo ""
+else
+    # Install mode: prompt for confirmation
+    if [ -d "$TARGET_DIR/.claude" ]; then
+        echo -e "${YELLOW}⚠️  .claude/ directory already exists${NC}"
+        echo "   Hint: Use --update flag to update an existing installation"
+        read -p "Do you want to overwrite it? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installation cancelled."
+            exit 0
+        fi
+        rm -rf "$TARGET_DIR/.claude"
+    fi
+
+    if [ -d "$TARGET_DIR/templates" ]; then
+        echo -e "${YELLOW}⚠️  templates/ directory already exists${NC}"
+        read -p "Do you want to overwrite it? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Skipping templates installation."
+            INSTALL_TEMPLATES=false
+        else
+            rm -rf "$TARGET_DIR/templates"
+            INSTALL_TEMPLATES=true
+        fi
+    else
         INSTALL_TEMPLATES=true
     fi
-else
-    INSTALL_TEMPLATES=true
 fi
 
 # Download .claude directory
@@ -134,12 +183,23 @@ if [ -f "$GITIGNORE_FILE" ]; then
 fi
 
 echo ""
-echo -e "${GREEN}✅ Installation complete!${NC}"
-echo ""
-echo "Next steps:"
-echo "  1. cd $TARGET_DIR"
-echo "  2. claude"
-echo "  3. /spec-init"
+if [ "$UPDATE_MODE" = true ]; then
+    echo -e "${BLUE}✅ Update complete!${NC}"
+    echo ""
+    echo "Updated components:"
+    echo "  - .claude/ (Sub-agents, Hooks, Commands)"
+    echo "  - templates/ (Spec templates)"
+    echo "  - .specs/ preserved (your work is safe)"
+    echo ""
+    echo "You can now continue using your project with the latest features!"
+else
+    echo -e "${GREEN}✅ Installation complete!${NC}"
+    echo ""
+    echo "Next steps:"
+    echo "  1. cd $TARGET_DIR"
+    echo "  2. claude"
+    echo "  3. /spec-init"
+fi
 echo ""
 echo "Documentation:"
 echo "  - Quick Start: https://github.com/frentis-ai-lab/ai-spec-based-development-helper/blob/main/QUICKSTART.md"
