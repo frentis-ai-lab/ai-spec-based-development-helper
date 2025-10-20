@@ -71,32 +71,75 @@
 ### 2.1 언어 및 런타임
 
 - **언어**: [TypeScript 5.3+ / Python 3.12+ / Go 1.22+ 등]
+  - **Context7 참조**: [예: `/microsoft/TypeScript/v5.4`]
 - **런타임**: [Node.js 20 LTS / Python uv / 등]
+  - **Context7 참조**: [예: `/nodejs/node`]
 - **패키지 매니저**: [pnpm / uv / 등]
 
-### 2.2 필수 라이브러리
+**Context7 Integration** (NEW):
+- 모든 주요 라이브러리 사용 시 Context7 문서 참조 필수
+- 스펙에 "§ 0. Technology References" 섹션 포함
+- Version Matrix로 현재 버전 vs 권장 버전 관리
+- EOL 버전 사용 금지
+
+### 2.2 필수 라이브러리 (Context7 참조 포함)
 
 #### 로깅
 - **사용**: `winston` (TypeScript) / `structlog` (Python)
+- **Context7**: `/winstonjs/winston` / [Python logging best practices]
 - **금지**: `console.log`, `print()` for production logging
 
 #### 데이터베이스 ORM
 - **사용**: `Prisma` (TypeScript) / `SQLAlchemy` (Python)
+- **Context7**: `/prisma/prisma` / `/sqlalchemy/sqlalchemy`
 - **금지**: Raw SQL strings (Prepared statements 예외)
 
 #### 테스트 프레임워크
 - **사용**: `Vitest` (TypeScript) / `pytest` (Python)
-- **커버리지 목표**: 80% 이상
+- **Context7**: `/vitest-dev/vitest` / `/pytest-dev/pytest`
+- **커버리지 목표**: 85% 이상 (Context7 Integration 프로젝트 기준)
 
 #### HTTP 클라이언트
 - **사용**: `axios` with interceptors / `httpx` (Python)
+- **Context7**: `/axios/axios` / [httpx docs]
 - **금지**: `fetch` without error handling / `requests` (Python, 동기만 지원)
 
-### 2.3 버전 정책
+### 2.3 버전 정책 (Context7 Integration)
 
 - **LTS 버전 사용**: Node.js, Python 등 안정 LTS만 사용
+- **EOL 버전 금지**: Context7 Version Matrix로 자동 체크
 - **의존성 업데이트**: 월 1회 `dependabot` PR 검토
 - **Breaking change**: Major 버전 업그레이드 시 ADR 문서화
+
+**Version Matrix 예시**:
+```markdown
+| 기술 | 현재 버전 | 권장 버전 | Context7 링크 | Status |
+|------|-----------|-----------|--------------|--------|
+| TypeScript | 5.4.0 | 5.4+ | `/microsoft/TypeScript/v5.4` | ✅ OK |
+| Node.js | 20.11.0 | 20.11+ (LTS) | `/nodejs/node` | ✅ OK |
+```
+
+**EOL 체크리스트**:
+- [ ] Node.js 16.x 이하 금지 (EOL 2023-09)
+- [ ] Python 3.8 이하 금지 (EOL 2024-10)
+- [ ] TypeScript 4.x 금지 (5.0+ 사용)
+
+### 2.4 Deprecated 패턴 금지 (NEW - Context7 기반)
+
+**TypeScript**:
+- ❌ `namespace` 사용
+  - **Context7**: `/microsoft/TypeScript/v5.4#modules`
+  - **대안**: ES modules (`import/export`)
+
+**Python**:
+- ❌ `typing.List`, `typing.Dict` (3.9+)
+  - **Context7**: `/python/cpython/v3.12#type-hints`
+  - **대안**: `list[str]`, `dict[str, int]`
+
+**Java**:
+- ❌ `new Date()`
+  - **Context7**: `/openjdk/jdk/v21#datetime-api`
+  - **대안**: `LocalDateTime.now()`, `ZonedDateTime.now()`
 
 ---
 

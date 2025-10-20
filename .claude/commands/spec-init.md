@@ -9,13 +9,48 @@ Create comprehensive specification documents for a new feature or project follow
    - Identify which spec files already exist (program-spec.md, api-spec.md, ui-ux-spec.md)
    - Determine project structure (backend/frontend/fullstack)
 
-2. **Understand the Requirement**
+2. **Analyze Project with Context7 Integration** (NEW)
+
+   Before asking questions, analyze the project to provide context-aware recommendations:
+
+   a. **Read Context7 Query Guide**
+   - Read `.claude/lib/context7-query.md` for Context7 usage instructions
+
+   b. **Detect Project Type**
+   - Source `.claude/lib/project-analyzer.sh`
+   - Run project analysis to detect language, version, frameworks
+   - Example output:
+     ```
+     Language: typescript
+     Version: 5.3.3
+     Frameworks: express, prisma
+     Context7 Mappings: /microsoft/TypeScript, /expressjs/express, /prisma/prisma
+     ```
+
+   c. **Query Context7 for Each Technology**
+   - For each detected technology, use Context7 MCP tools:
+     1. `mcp__context7__resolve_library_id` - Get library ID
+     2. `mcp__context7__get_library_docs` - Get latest documentation
+   - Filter by trust score (≥7 preferred)
+   - Store results for later injection into spec
+
+   d. **Check for EOL Versions**
+   - Compare detected versions with EOL list
+   - Flag any End-of-Life versions for immediate upgrade warning
+
+   e. **Generate Version Recommendations**
+   - Compare current versions with Context7 latest versions
+   - Prepare upgrade recommendations if current < recommended
+
+3. **Understand the Requirement**
    - Ask clarifying questions if the user's request is vague
    - Identify the core problem being solved
    - Determine the scope and boundaries
    - Understand which aspects need specification (architecture, API, UI/UX)
+   - **Use detected technology context** to ask relevant questions
+     (e.g., for Express projects, ask about middleware strategy)
 
-3. **Create/Update Specification Documents**
+4. **Create/Update Specification Documents**
 
    Based on project structure, work with these files:
 
@@ -42,6 +77,40 @@ Create comprehensive specification documents for a new feature or project follow
    **Date**: [Current Date]
    **Status**: Draft
    **Version**: 1.0
+
+   ## 0. Technology References (NEW - Context7 Integration)
+
+   ### Context7 Documentation
+
+   [Inject Context7 links for detected technologies]
+
+   - **[Technology 1]**: `/org/repo/version`
+     - [Key topics from Context7 docs]
+     - [Best practices]
+     - [Latest features]
+
+   - **[Technology 2]**: `/org/repo/version`
+     - [Key topics]
+
+   ### Version Matrix
+
+   | 기술 | 현재 버전 | 권장 버전 | Context7 링크 | Status |
+   |------|-----------|-----------|--------------|--------|
+   | [Tech 1] | [current] | [recommended] | `/org/repo/version` | [✅/⚠️/❌] |
+   | [Tech 2] | [current] | [recommended] | `/org/repo/version` | [✅/⚠️/❌] |
+
+   **Status 기준**:
+   - ✅ OK: 현재 버전이 권장 버전 이상
+   - ⚠️  Update: 업그레이드 권장
+   - ❌ EOL: End-of-Life, 즉시 업그레이드 필요
+
+   **Version Recommendations**:
+   [If current < recommended, add upgrade plan]
+   - [ ] [Technology] upgrade from [current] to [recommended]
+   - Estimated effort: [hours/days]
+   - Breaking changes: [link to migration guide]
+
+   ---
 
    ## 1. Overview
    ### Problem Statement
@@ -130,8 +199,17 @@ Create comprehensive specification documents for a new feature or project follow
 
    ### Code Example
    ```language
+   // Reference: [Technology Version] - [Feature Name]
+   // Context7: /org/repo/version#feature
    // Example of key implementation
+
+   [Your code here]
    ```
+
+   **Technology Reference Check**:
+   - [x] Context7 link added to code comments
+   - [x] Referenced Context7 documentation topic
+   - [ ] [Add any language-specific checks from Context7]
 
    ### API Contract (if applicable)
    ```json
@@ -207,16 +285,29 @@ Create comprehensive specification documents for a new feature or project follow
 
 7. **Next Steps**
    After creating/updating the specs:
+   - **Show Project Analysis Summary**:
+     ```
+     ✅ Language: [detected]
+     ✅ Frameworks: [list]
+     ✅ Context7: [count] technologies referenced
+     ⚠️  Recommendations: [version upgrades if any]
+     ```
    - Notify user which spec files were created/updated
-   - Show summary of each spec (sections filled)
-   - Suggest running `/spec-review` to analyze quality
+   - Show summary of each spec (sections filled, including § 0. Technology References)
+   - **Highlight Context7 Integration**:
+     - Number of Context7 links added
+     - Version Matrix status (any EOL or outdated versions)
+   - Suggest running `/spec-review` to analyze quality (including Modern Best Practices)
    - Remind: Do NOT proceed to implementation until spec is approved (90+ score)
 
 ## Important Guidelines
-- **Be thorough** - Don't rush to code, fill all template sections
+- **Context7 First** - Always run project analysis and query Context7 before spec creation
+- **Be thorough** - Don't rush to code, fill all template sections (especially § 0. Technology References)
 - **Ask questions** - Better to clarify now than fix later
-- **Think critically** - Challenge the approach
+- **Think critically** - Challenge the approach, use Context7 docs for best practices
 - **Document assumptions** - Make implicit knowledge explicit
-- **Consider alternatives** - Why this approach vs others?
+- **Consider alternatives** - Why this approach vs others? (Check Context7 for alternative patterns)
 - **Maintain consistency** - Keep the 3 specs in sync with cross-references
 - **Use templates** - If spec templates exist, use them as structure guide
+- **Version awareness** - Always include Version Matrix and flag EOL versions
+- **Trust Score** - Only use Context7 docs with trust score ≥7 for automatic injection

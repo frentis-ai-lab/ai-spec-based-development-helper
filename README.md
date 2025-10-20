@@ -48,7 +48,32 @@ Claude Code를 위한 **Specification-First 방법론 강제 도구**입니다:
 curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash
 ```
 
-### 2. 첫 프로젝트
+### 2. Context7 MCP 설정 (선택사항, 권장)
+
+**Context7이란?** 최신 라이브러리 문서를 자동으로 제공하는 MCP 서버입니다.
+
+**설정 방법**:
+
+프로젝트에 이미 `.mcp.json` 파일이 포함되어 있습니다:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
+```
+
+**Claude Code 재시작**하면 자동으로 Context7 MCP가 활성화됩니다.
+
+**확인 방법**:
+- Claude Code 재시작 후 MCP 아이콘 확인
+- `/spec-init` 실행 시 자동으로 Context7 조회
+
+### 3. 첫 프로젝트
 
 ```bash
 # Claude Code 실행

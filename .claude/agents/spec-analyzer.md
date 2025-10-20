@@ -222,14 +222,216 @@ If violations found, append to Critical Gaps:
 **Impact**: -3 points from Constitution check (3 violations * 1 point each)
 ```
 
-## Total Scoring
+## Step 5: Modern Best Practices Check (NEW - Context7 Integration, +10 points)
 
-**Maximum Points** (Updated with Constitution):
-- Backend project: program-spec (40) + api-spec (35) + consistency (10) + constitution (5) = 90 points → scale to 100
-- Frontend project: program-spec (40) + ui-ux-spec (40) + consistency (10) + constitution (5) = 95 points → scale to 100
-- Fullstack project: program-spec (40) + api-spec (35) + ui-ux-spec (40) + consistency (10) + constitution (5) = 130 points → scale to 100
+**If spec includes "## 0. Technology References" section**, evaluate Context7 integration quality.
 
-**Constitution Bonus**:
+### 5.1 Context7 참조 여부 (3 points)
+
+#### Check 1: Technology References Section Exists (1 point)
+- [ ] Section "## 0. Technology References" present
+- [ ] Section appears before "## 1. Overview"
+
+#### Check 2: Context7 Links Count (2 points)
+- [ ] **3+ Context7 links**: 2 points
+- [ ] **1-2 Context7 links**: 1 point
+- [ ] **0 links**: 0 points
+
+**Context7 Link Format**: Must be backtick-wrapped like `/org/repo` or `/org/repo/version`
+
+**Example**:
+```markdown
+✅ Good:
+- **TypeScript**: `/microsoft/TypeScript/v5.4`
+- **Express**: `/expressjs/express`
+- **Prisma**: `/prisma/prisma`
+
+❌ Bad:
+- TypeScript (no link)
+- Express: https://expressjs.com (external link, not Context7)
+```
+
+### 5.2 최신 패턴 준수 (4 points)
+
+#### Automated Check Algorithm
+
+```python
+async def check_latest_patterns(spec_content: str) -> Dict:
+    score = 0
+    issues = []
+
+    # Step 1: Extract Context7 links from spec
+    context7_links = extract_context7_links(spec_content)
+    # e.g., ["/microsoft/TypeScript/v5.4", "/expressjs/express"]
+
+    if not context7_links:
+        return {"score": 0, "issues": ["No Context7 links to validate"]}
+
+    # Step 2: Query Context7 for each library
+    for link in context7_links:
+        try:
+            docs = await mcp__context7__get_library_docs({
+                "context7CompatibleLibraryID": link,
+                "topic": "best practices, common patterns, deprecated features",
+                "tokens": 3000
+            })
+
+            # Step 3: Extract code examples from spec
+            code_examples = extract_code_blocks(spec_content, language=get_lang(link))
+
+            # Step 4: Check for deprecated patterns
+            deprecated = find_deprecated_patterns(code_examples, docs.content)
+
+            if not deprecated:
+                score += 1  # Max 4 points (one per major technology)
+            else:
+                for dep in deprecated:
+                    issues.append({
+                        "pattern": dep.pattern,
+                        "location": dep.location,
+                        "context7_ref": link,
+                        "recommendation": dep.fix
+                    })
+        except Context7Error:
+            # Network error or library not found - skip without penalty
+            continue
+
+    return {
+        "score": min(score, 4),
+        "issues": issues
+    }
+```
+
+#### Deprecated Pattern Detection
+
+**Common Deprecated Patterns** (reference: context7-integration-spec.md §13.3):
+
+| Language | Deprecated | Recommended | Context7 Reference |
+|----------|-----------|-------------|-------------------|
+| TypeScript | `namespace` | ES modules | `/microsoft/TypeScript/v5.4#modules` |
+| TypeScript | `: any` | `: unknown` or generics | `/microsoft/TypeScript/v5.4#strict-mode` |
+| Python | `typing.List` | `list` (3.9+) | `/python/cpython/v3.12#type-hints` |
+| Java | `new Date()` | `LocalDateTime.now()` | `/openjdk/jdk/v21#datetime-api` |
+
+**Exception Handling** (same 7 patterns as Constitution check):
+1. "avoid", "대안", "instead of", "금지", "❌", code blocks, negations → Skip (educational context)
+
+### 5.3 버전 준수 (3 points)
+
+#### Check 1: Version Matrix Exists (1 point)
+- [ ] "### Version Matrix" table present in § 0
+- [ ] Table has columns: 기술, 현재 버전, 권장 버전, Context7 링크, Status
+
+#### Check 2: EOL Version Check (1 point)
+- [ ] All versions checked against EOL list
+- [ ] EOL versions flagged with ❌ status
+
+**EOL Version List** (from context7-query.md):
+```python
+EOL_VERSIONS = {
+    "node": ["14.x", "16.x"],       # EOL 2023
+    "python": ["3.7", "3.8"],       # EOL 2023
+    "java": ["8"],                  # Non-LTS
+    "typescript": ["4.x"],          # < 5.0
+}
+```
+
+#### Check 3: Upgrade Plan (1 point)
+- [ ] If current < recommended: upgrade plan present
+- [ ] Plan includes: version upgrade task, estimated effort, breaking changes note
+
+**Example**:
+```markdown
+✅ Good:
+**Version Recommendations**:
+- [ ] TypeScript upgrade from 5.3 to 5.4
+  - Estimated effort: 2 hours
+  - Breaking changes: None expected
+
+❌ Bad:
+(no upgrade plan despite outdated version)
+```
+
+### 5.4 Output Modern Best Practices Result
+
+```markdown
+## Modern Best Practices: X/10 points
+
+### Context7 References (X/3)
+✅ Technology References section exists
+✅ 3 Context7 links found
+
+**Referenced Technologies**:
+- `/microsoft/TypeScript/v5.4` (Trust Score: 9)
+- `/expressjs/express` (Trust Score: 8)
+- `/prisma/prisma` (Trust Score: 9)
+
+### Latest Patterns (X/4)
+✅ TypeScript strict mode used
+✅ Express async middleware pattern
+✅ Prisma query optimization
+❌ Deprecated: `bcrypt.hashSync()` (should use async variant)
+
+**Issues Found**:
+1. **Location**: program-spec.md:145
+   - **Pattern**: `bcrypt.hashSync()`
+   - **Issue**: Blocks event loop in async context
+   - **Context7**: `/kelektiv/node.bcrypt.js#async-recommended`
+   - **Fix**: Use `await bcrypt.hash()` instead
+
+### Version Compliance (X/3)
+✅ Version Matrix present
+✅ EOL versions checked (none found)
+❌ Upgrade plan missing (TypeScript 5.3 → 5.4)
+
+**Recommendations**:
+- Add TypeScript upgrade plan to "Version Recommendations" section
+- Include estimated migration effort and breaking change analysis
+```
+
+### 5.5 Scoring Logic
+
+```python
+modern_score = 0
+
+# Context7 References (0-3)
+if has_tech_refs_section:
+    modern_score += 1
+
+link_count = count_context7_links(spec)
+if link_count >= 3:
+    modern_score += 2
+elif link_count >= 1:
+    modern_score += 1
+
+# Latest Patterns (0-4)
+pattern_result = await check_latest_patterns(spec)
+modern_score += pattern_result.score  # 0-4
+
+# Version Compliance (0-3)
+if has_version_matrix:
+    modern_score += 1
+if eol_checked:
+    modern_score += 1
+if has_upgrade_plan or all_versions_ok:
+    modern_score += 1
+
+return modern_score  # 0-10
+```
+
+## Total Scoring (UPDATED)
+
+**Maximum Points** (with Modern Best Practices):
+- Backend project: program-spec (40) + api-spec (35) + consistency (10) + constitution (5) + modern (10) = 100 points → **no scaling needed**
+- Frontend project: program-spec (40) + ui-ux-spec (40) + consistency (10) + constitution (5) + modern (10) = 105 points → scale to 100
+- Fullstack project: program-spec (40) + api-spec (35) + ui-ux-spec (40) + consistency (10) + constitution (5) + modern (10) = 140 points → scale to 100
+
+**Modern Best Practices Bonus**:
+- If spec has no "Technology References" section: 0 points (no penalty)
+- If spec has Context7 integration: 0-10 points based on quality
+- This rewards following latest best practices but doesn't penalize older specs
+
+**Constitution Bonus** (unchanged):
 - If no Constitution file exists: score unchanged (no penalty)
 - If Constitution exists: +5 bonus points for full compliance
 - Violations: -1 point per violation (max -5)
@@ -289,6 +491,22 @@ Provide your analysis in this format:
 
 **Violations**: [List violations or "None"]
 **Compliant Items**: [List compliant items]
+
+### Modern Best Practices: X/10 points (NEW)
+[If spec has "## 0. Technology References" section]
+- Context7 References: X/3
+  - Technology References section: [Yes/No]
+  - Context7 links count: [number]
+- Latest Patterns: X/4
+  - [List checked technologies and issues]
+- Version Compliance: X/3
+  - Version Matrix: [Yes/No]
+  - EOL check: [Pass/Fail]
+  - Upgrade plan: [Yes/No/N/A]
+
+**Referenced Technologies**: [List Context7 links]
+**Pattern Issues**: [List deprecated patterns found or "None"]
+**Version Issues**: [List EOL or outdated versions or "None"]
 
 ### Overall Score: X/100
 
