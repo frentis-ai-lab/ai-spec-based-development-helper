@@ -1,0 +1,27 @@
+Constitution System E2E Test Results
+====================================
+
+Date: #오후
+Test Project: /Users/existmaster/ai-spec-based-development-helper/workspaces/e2e-constitution-test
+Results Directory: /Users/existmaster/ai-spec-based-development-helper/.test/results/e2e-20251018-233211
+
+Test Summary:
+-------------
+Total: 5
+Passed: 3
+Failed: 2
+Success Rate: 60.0%
+
+Scenarios:
+----------
+1. Constitution Violation Detection
+2a. Normal Mode Hook Warning
+2b. Relaxed Mode Hook Bypass
+3. Exception Pattern Recognition
+
+Files:
+------
+- scenario1-output.txt (spec-review with violations)
+- scenario2a-hook-output.txt (normal mode hook)
+- scenario2b-hook-output.txt (relaxed mode hook)
+- scenario3-output.txt (spec-review with exceptions)

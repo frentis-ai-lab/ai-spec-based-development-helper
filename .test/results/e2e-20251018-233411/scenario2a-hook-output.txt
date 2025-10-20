@@ -1,0 +1,6 @@
+⚠️  WARNING: No approved specifications found!
+
+Your specifications need to be reviewed and approved.
+Run: /spec-review to analyze your specification
+
+Proceeding with caution...
