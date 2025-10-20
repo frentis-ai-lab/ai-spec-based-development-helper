@@ -1,6 +1,6 @@
 {
   "name": "ai-spec-based-development-helper",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Claude Code toolkit enforcing specification-first development methodology",
   "keywords": [
     "claude-code",
