@@ -667,6 +667,18 @@ cd your-project
 curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash
 ```
 
+**특정 버전 설치**:
+```bash
+# 최신 릴리즈 (자동 감지)
+curl -fsSL https://[...]/install.sh | bash
+
+# 특정 버전 지정
+curl -fsSL https://[...]/install.sh | bash -s -- --version v0.0.2
+
+# 최신 개발 버전 (main 브랜치)
+curl -fsSL https://[...]/install.sh | bash -s -- --version main
+```
+
 **로컬 설치**:
 ```bash
 # 1. 레포지토리 클론
@@ -681,9 +693,14 @@ cd /path/to/your-project
 claude
 ```
 
-**설치 스크립트가 하는 일**:
-- ✅ `.claude/` 디렉토리 복사 (실제 파일, 심볼릭 링크 아님)
-- ✅ `templates/` 디렉토리 복사
+**설치 스크립트 v2.0 (개선됨 ✨)**:
+- ✅ **Tarball 다운로드** (git clone보다 5x 빠름)
+- ✅ **자동 버전 감지** (GitHub API로 최신 릴리즈 확인)
+- ✅ **재시도 로직** (네트워크 오류 시 최대 3회 재시도)
+- ✅ **버전 추적** (`.claude/.version` 파일 자동 생성)
+- ✅ **Dry-run 모드** (`--dry-run`: 미리보기, 파일 수정 없음)
+- ✅ **Force 모드** (`--force`: 모든 확인 생략)
+- ✅ `.claude/`, `templates/` 디렉토리 복사
 - ✅ `.specs/` 디렉토리 생성
 - ✅ Hook 실행 권한 자동 설정
 - ✅ `.gitignore` 자동 업데이트
@@ -694,13 +711,38 @@ claude
 cd your-project
 curl -fsSL https://raw.githubusercontent.com/frentis-ai-lab/ai-spec-based-development-helper/main/scripts/install.sh | bash -s -- --update
 
-# 또는 로컬에서
-./scripts/install.sh /path/to/your-project --update
+# Dry-run으로 변경사항 미리보기
+curl -fsSL https://[...]/install.sh | bash -s -- --update --dry-run
+
+# 자동 업데이트 (확인 없이)
+curl -fsSL https://[...]/install.sh | bash -s -- --update --force
 ```
 
-**--update 플래그 특징**:
+**고급 옵션**:
+```bash
+# 모든 옵션 보기
+./scripts/install.sh --help
+
+# Dry-run (미리보기, 파일 수정 안 함)
+./scripts/install.sh /path/to/project --dry-run
+
+# 특정 버전 설치
+./scripts/install.sh /path/to/project --version v0.0.2
+
+# Force 모드 (확인 없이 설치)
+./scripts/install.sh /path/to/project --force
+
+# Claude 체크 건너뛰기 (CI/CD용)
+./scripts/install.sh /path/to/project --skip-claude
+
+# 조합 사용
+./scripts/install.sh /path/to/project --update --version v0.0.2 --force
+```
+
+**업데이트 특징**:
 - ✅ `.claude/`, `templates/` 자동 덮어쓰기 (확인 없음)
 - ✅ `.specs/` 디렉토리 보존 (작업물 안전)
+- ✅ 버전 추적 (v0.0.1 → v0.0.2)
 - ✅ 빠른 업데이트 (프롬프트 없음)
 
 **장점**:
